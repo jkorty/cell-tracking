@@ -1,6 +1,8 @@
 //
 //  main.cpp
-//  project
+//  Cell Tracking for Tyler Nelson at OSU
+//
+//  Using OpenCV to track cell movement from video
 //
 //  Created by Jonathan Korty on 1/12/15.
 //  Copyright (c) 2015 Jonathan Korty. All rights reserved.
@@ -16,27 +18,29 @@ using namespace cv;
 RNG rng(12345);
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
     
-    VideoCapture cap;
+    cv::VideoCapture cap;
     if(argc > 1) cap.open(string(argv[1]));
     else cap.open(0);
 
-//    Mat frame;
-//    namedWindow("video",1);
-//    Mat binFrame;
-    Mat frame_img[1000];
+    cv::Mat frame_img[1000];
     cv::Mat frame;
     cap >> frame;
     if(frame.empty()) return -1;
     
     cv::namedWindow("Video");
-    //cv::namedWindow("Contour");
     int count = 1;
+    
+    int noise_frame = 9;
+    
     while(true){
         cap >> frame;
         if(frame.empty()) break;
-        if(count>9){
+        
+        // Skip the to frame 9, due to excessive noise
+        // Obviously, this is a case by case value
+        
+        if( count > noise_frame ){
             cv::Mat cont, threshold;
             cont = frame.clone();
             cv::cvtColor(cont, cont, cv::COLOR_BGR2GRAY);
@@ -49,25 +53,35 @@ int main(int argc, const char * argv[]) {
             
             cv::findContours(cont, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
             
-            /// Get the moments
+            // Get the moments
             vector<Moments> mu(contours.size() );
-//            std::cout << "CONTOURS:\n\n";
             for( int i = 0; i < contours.size(); i++ )
             {
                 mu[i] = moments( contours[i], false );
-//                std::cout << contours[i] << "\n";
             }
+            
+            // Output frame and number of contours
             std::cout << "FRAME: " << count << "\tCOUNT: " << contours.size() << std::endl;
-            ///  Get the mass centers:
+            
+            //  Get the mass centers:
             vector<Point2f> mc( contours.size() );
             std::cout << "CENTROID: \n";
             for( int i = 0; i < contours.size(); i++ )
             {
+
+/* TODO ===============================================================================
+ 
+                // Check for nearest previous location of a center
+                // But only if it is not the first iteration
+                if( count > noise_frame+1 ){
+                    
+                }
+ 
+===================================================================================== */
+                
                 mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
                 std::cout << mc[i] << "\n";
             }
-            
-            
             
             Mat drawing = Mat::zeros( cont.size(), CV_8UC3 );
             for(size_t i=0; i<contours.size(); i++){
@@ -78,7 +92,6 @@ int main(int argc, const char * argv[]) {
                 
             }
             frame_img[count] = frame;
-            //cv::imshow("Contour", threshold);
             
             // Output frame_x.png
             std::ostringstream name;
@@ -99,14 +112,6 @@ int main(int argc, const char * argv[]) {
     }
     for(;;)
     {
-//        cap >> frame;
-//        if(!frame.data) break;
-//        
-//        cvtColor(frame, frame, CV_RGB2GRAY);
-//        blur( frame, frame, Size(3,3));
-//        
-//        binFrame = frame > 100;
-//        imshow("video", binFrame);
         if(waitKey(30) >= 0) break;
     }
     
