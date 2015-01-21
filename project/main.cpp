@@ -19,8 +19,11 @@ RNG rng(12345);
 
 int main(int argc, const char * argv[]) {
     
+    // Set to true to analyze video frame by frame during execution
+    bool debugMode = false;
+    
     cv::VideoCapture cap;
-    if(argc > 1) cap.open(string(argv[1]));
+    if( argc > 1 ) cap.open(string(argv[1]));
     else cap.open(0);
 
     cv::Mat frame_img[1000];
@@ -100,20 +103,29 @@ int main(int argc, const char * argv[]) {
             
             // Show video
             cv::imshow("Video", frame);
-            for(;;)
-            {
-                if(waitKey(30) >= 0) break;
+            
+            if(debugMode){
+
+                for(;;)
+                {
+                    if(waitKey(30) >= 0) break;
+                }
+                
             }
         }
+        
         count++;
+        
         if(cv::waitKey(10)==27 ) {
             break;
         }
+
     }
-    for(;;)
-    {
+
+    for(;;) {
         if(waitKey(30) >= 0) break;
     }
+
     
     return 0;
 }
