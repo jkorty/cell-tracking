@@ -1,21 +1,54 @@
-//
 //  main.cpp
 //  Cell Tracking for Tyler Nelson at OSU
-//
 //  Using OpenCV to track cell movement from video
-//
 //  Created by Jonathan Korty on 1/12/15.
-//  Copyright (c) 2015 Jonathan Korty. All rights reserved.
-//
-
+//  Copyright (c) 2015 Jonathan Korty. All rights reserved
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-
+#include <map>
+#include <sstream>
 using namespace cv;
 
+template <class T>
+inline std::string to_string(const T& t)
+{
+    std::stringstream ss;
+    ss<<t;
+    return ss.str();
+}
+
 RNG rng(12345);
+
+class DbScan
+{
+    public:
+        std::map<int, int> labels;
+        vector<Rect>& data;
+        int C;
+        double eps;
+        int mnpts;
+        double* dp;
+        #define DP(i,j) dp[(data.size()*i_)+j]
+        
+        DbScan(vector<Rect>& _data, double _eps, int _mnpts):data(_data)
+        {
+            C=-1;
+            
+            for(int i=0; i<data.size(); i++)
+            {
+                labels[i] = -99;
+            }
+            eps=_eps;
+            mnpts=_mnpts;
+        }
+        
+        void run()
+        {
+            dp = new double[data.size()*data.size()];
+        }
+}
 
 int main(int argc, const char * argv[]) {
     
